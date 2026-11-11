@@ -1,0 +1,58 @@
+<Window x:Class="HanekawaPet.GachaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="小翼的扭蛋屋" Width="800" Height="710" MinWidth="620" MinHeight="520"
+        WindowStartupLocation="CenterScreen" Background="#F7F4EE" FontFamily="Microsoft YaHei UI" FontSize="14">
+    <Window.Resources>
+        <Style TargetType="Button"><Setter Property="Padding" Value="20,10"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#426B83"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.45"/></Trigger>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value="0.85"/></Trigger>
+                </ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style TargetType="TabItem"><Setter Property="Padding" Value="24,11"/><Setter Property="FontSize" Value="15"/></Style>
+    </Window.Resources>
+    <Grid Margin="26">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition/></Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,6"><TextBlock Text="小翼的扭蛋屋" FontSize="27" FontWeight="SemiBold" Foreground="#294455"/>
+            <Border Background="#E8EEE9" CornerRadius="12" Padding="12,6" HorizontalAlignment="Right"><TextBlock x:Name="QuotaText" Foreground="#476252"/></Border>
+        </DockPanel>
+        <TextBlock Grid.Row="1" Text="每天一颗，慢慢收集喜欢的小东西。" Foreground="#81827A" Margin="0,4,0,22"/>
+        <TabControl x:Name="Pages" Grid.Row="2" Background="Transparent" BorderThickness="0">
+            <TabItem Header="扭蛋">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="8,20,8,10">
+                    <Border Background="White" BorderBrush="#E4E4DA" BorderThickness="1" CornerRadius="20" Padding="20">
+                        <Grid Height="285">
+                            <Image x:Name="AnimationImage" Stretch="Uniform" Visibility="Collapsed"/>
+                            <StackPanel x:Name="AnimationPlaceholder" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Border Width="160" Height="155" CornerRadius="70,70,22,22" BorderBrush="#DDDCD3" BorderThickness="1" Background="#FAFAF7"/>
+                                <TextBlock x:Name="AnimationHint" Text="扭蛋动画预留位置" Foreground="#A6A59A" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                            </StackPanel>
+                            <Border x:Name="DrawingVeil" Background="Transparent" CornerRadius="16" Visibility="Collapsed">
+                                <TextBlock Text="正在转动扭蛋…" Foreground="#75858B" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,15"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <TextBlock x:Name="StatusText" TextWrapping="Wrap" TextAlignment="Center" Foreground="#6D7978" Margin="14,18,14,14"/>
+                    <Button x:Name="DrawButton" Content="转一颗扭蛋" Click="OnDraw" Width="225" HorizontalAlignment="Center" FontSize="17"/>
+                    <Button x:Name="PreviewButton" Content="预览随机动画" Click="OnPreview" Background="#E4E9E5" Foreground="#3B5C56" HorizontalAlignment="Center" Margin="0,10,0,0" Visibility="Collapsed"/>
+                    <Button x:Name="PendingButton" Content="查看上次抽中的物品" Click="OnPending" Background="#E4E9E5" Foreground="#3B5C56" HorizontalAlignment="Center" Margin="0,10,0,0" Visibility="Collapsed"/>
+                    <TextBlock Text="每天限抽一次 · 北京时间 00:00 刷新" Foreground="#9B9A8D" TextAlignment="Center" FontSize="12" Margin="0,14,0,0"/>
+                </StackPanel></ScrollViewer>
+            </TabItem>
+            <TabItem Header="展示柜">
+                <Grid Margin="8,18,8,4"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/></Grid.RowDefinitions>
+                    <DockPanel Margin="4,0,4,14"><TextBlock Text="我的小小收藏" FontSize="19" FontWeight="SemiBold" Foreground="#5C5145"/>
+                        <TextBlock x:Name="CollectionText" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#8E8375"/>
+                    </DockPanel>
+                    <Border Grid.Row="1" Background="#E5D6BD" BorderBrush="#C8AD87" BorderThickness="8" CornerRadius="16" Padding="10">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel x:Name="CabinetRows"/></ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

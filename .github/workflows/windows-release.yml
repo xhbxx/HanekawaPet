@@ -1,0 +1,93 @@
+name: Windows build and release
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate release tag
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          IS_TAG: ${{ github.ref_type }}
+        run: |
+          $version = ([xml](Get-Content HanekawaPet.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ($env:IS_TAG -eq 'tag' -and $env:RELEASE_TAG -ne "v$version") { throw 'Tag and project version differ.' }
+      - name: Build portable app
+        shell: pwsh
+        run: ./build.ps1 -SkipArchive
+      - name: Desktop integration checks
+        shell: pwsh
+        run: ./scripts/Test-Desktop.ps1
+      - name: Backend checks with local mock services
+        shell: pwsh
+        run: |
+          dotnet build backend/HanekawaPet.Backend.csproj --nologo
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:HANEKAWA_TEST_EXE = "$pwd/dist-ai/HanekawaPet.exe"
+          python qa/test_backend.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python qa/test_search_fallback.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Package release and checksum
+        shell: pwsh
+        run: ./scripts/Package-Release.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: |
+            artifacts/HanekawaPet-*.zip
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-checks
+          path: |
+            artifacts/checks/summary.json
+            artifacts/checks/framework/framework-checks.json
+            artifacts/checks/routine/results.json
+            artifacts/checks/gacha/results.json
+          if-no-files-found: ignore
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-x64-release
+          path: artifacts
+      - name: Create draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $assets = @(Get-ChildItem artifacts -File | Select-Object -ExpandProperty FullName)
+          gh release view $env:RELEASE_TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+            $draft = gh release view $env:RELEASE_TAG --json isDraft --jq .isDraft
+            if ($draft -ne 'true') { throw 'Release is already public; use a new version tag.' }
+            gh release upload $env:RELEASE_TAG @assets --clobber
+          } else {
+            gh release create $env:RELEASE_TAG @assets --draft --verify-tag --title "HanekawaPet $env:RELEASE_TAG" --notes-file docs/RELEASE-NOTES.md
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -1,0 +1,192 @@
+using System.IO;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using HanekawaPet.Core;
+
+namespace HanekawaPet;
+
+public partial class PetWindow
+{
+    internal void RunRoutineSmoke(string directory)
+    {
+        Directory.CreateDirectory(directory); _timer.Stop();
+        var checks = new List<object>(); var failed = false;
+        void Check(string name, bool passed) { checks.Add(new { name, passed }); if (!passed) failed = true; }
+        void Capture(string name)
+        {
+            UpdateLayout();
+            var bitmap = new RenderTargetBitmap((int)ActualWidth, (int)ActualHeight, 96, 96, PixelFormats.Pbgra32); bitmap.Render(this);
+            var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(bitmap));
+            using var output = File.Create(Path.Combine(directory, name + ".png")); png.Save(output);
+        }
+        try
+        {
+            SetMovement(MovementMode.Walk, 1);
+            var now = Now; var left = Left; _routine.Interact(now - 61000);
+            Advance(now, TimeSpan.FromHours(1));
+            Check("night rest stops walking and selects supplied curled animation", _resting && _state.StartsWith("sleep") && Left == left && _clip!.DurationMs == 4000);
+            Capture("curled-rest");
+            var until = _restCycleUntil; var clip = _clip; var start = _stateStarted;
+            Advance(now + 3999, TimeSpan.FromHours(1));
+            Check("variant is retained throughout the full four-second cycle", ReferenceEquals(clip, _clip) && _stateStarted == start && _restCycleUntil == until);
+            Advance(now + 4000, TimeSpan.FromHours(1));
+            Check("next rest variant starts only at a loop boundary", _restCycleUntil == until + 4000 && _state.StartsWith("sleep"));
+            Advance(now + 4001, TimeSpan.FromHours(6));
+            Check("six o'clock ends scheduled rest and resumes movement", !_resting && _state == "walk-right");
+            SetMovement(MovementMode.Stay); now = Now;
+            _routine.Interact(now - 26 * 60000);
+            Advance(now, TimeSpan.FromHours(10));
+            Check("idle triggers one complete yawn and schedules the next random interval", _state == "yawn" && _action == "yawn" && !_clip!.Loop && _routine.NextYawnAt >= now + 15 * 60000 && _routine.NextYawnAt < now + 25 * 60000);
+            RenderFrame(_stateStarted + 2800); Capture("yawn");
+            var end = _actionUntil;
+            Advance(end + 1, TimeSpan.FromHours(10));
+            Check("yawn finishes and returns to idle instead of looping", _state == "idle" && _action == null);
+            now = Now; _routine.Interact(now - PetRoutine.LongIdleMs - 1);
+            Advance(now, TimeSpan.FromHours(10));
+            Check("three-hour inactivity rests during daytime without overwriting manual setting", _resting && _state.StartsWith("sleep") && !_settings.Sleeping);
+            RecordInteraction(); Advance(Now, TimeSpan.FromHours(10));
+            Check("interaction wakes long-idle rest and restarts inactivity timer", !_resting && _state == "idle" && !_routine.YawnDue(Now));
+            now = Now; _routine.Interact(now - 61000); Advance(now, TimeSpan.FromHours(13));
+            Check("13 o'clock starts scheduled midday rest", _resting);
+            RecordInteraction(); Advance(Now, TimeSpan.FromHours(13));
+            Check("scheduled rest allows a one-minute wake period after interaction", !_resting && _state == "idle");
+            now = Now; _routine.Interact(now - 61000); Advance(now, TimeSpan.FromHours(13));
+            BeginPetDrag(); MovePetDrag(Left + 1, Top); Advance(Now, TimeSpan.FromHours(13));
+            Check("dragging interrupts automatic rest with directional drag animation", !_resting && _state == "drag-right");
+            EndPetDrag(); Advance(Now, TimeSpan.FromHours(13));
+            Check("drag release wakes and resets inactivity", !_resting && _state == "idle");
+            SetSleeping(true); Advance(Now, TimeSpan.FromHours(10));
+            Check("manual rest still uses weighted curled variants", _resting && _state.StartsWith("sleep"));
+            RecordInteraction(); Advance(Now, TimeSpan.FromHours(10));
+            Check("click or chat can wake manual rest", !_resting && !_settings.Sleeping);
+            now = Now; _routine.Interact(now - 8 * 60000); var nextYawn = _routine.NextYawnAt;
+            Advance(now, TimeSpan.FromHours(10), 0);
+            Check("daily idle triggers original single-play knock without delaying yawns", _state == "knock" && _clip!.Frames.Count == 6 && !_clip.Loop && _clip.DurationMs == 2180 && _routine.NextYawnAt == nextYawn);
+            RenderFrame(_stateStarted + 650); Capture("screen-knock");
+            end = _actionUntil; Advance(end + 1, TimeSpan.FromHours(10));
+            Check("knock completes and returns to normal idle", _state == "idle" && _action == null);
+            now = Now; _routine.Interact(now - 8 * 60000); Advance(now, TimeSpan.FromHours(10));
+            RecordInteraction(); Advance(Now, TimeSpan.FromHours(10));
+            Check("user interaction interrupts knock and restarts its random timer", _state == "idle" && !_routine.KnockDue(Now));
+            now = Now; _routine.Interact(now - 8 * 60000); Advance(now, TimeSpan.FromHours(1));
+            Check("scheduled rest takes priority over a due knock", _resting && _state.StartsWith("sleep"));
+            RecordInteraction(); BeginPetDrag(); MovePetDrag(Left + 1, Top);
+            now = Now; _routine.Interact(now - 8 * 60000); Advance(now, TimeSpan.FromHours(10));
+            Check("a due knock does not interrupt dragging", _state == "drag-right" && _action == null);
+            RecordInteraction(); EndPetDrag();
+            ShowSettings(); now = Now; _routine.Interact(now - 8 * 60000); Advance(now, TimeSpan.FromHours(10));
+            Check("a due knock waits while settings are in use", _state == "idle" && _action == null);
+            _settingsWindow!.Close(); RecordInteraction();
+            Check("settings menu includes knock preview", CreateSettingsMenu().Items.OfType<System.Windows.Controls.MenuItem>().Any(i => i.Header.ToString() == "敲击屏幕"));
+            now = Now; _routine.Interact(now - 8 * 60000); nextYawn = _routine.NextYawnAt; left = Left;
+            Advance(now, TimeSpan.FromHours(10), .99);
+            Check("random pool selects original eight-frame foot swing without moving the pet", _state == "foot-swing" && _clip!.Frames.Count == 8 && _clip.DurationMs == 2800 && !_clip.Loop && Left == left && _routine.NextYawnAt == nextYawn);
+            RenderFrame(_stateStarted + 1400); Capture("foot-swing");
+            end = _actionUntil; Advance(end + 1, TimeSpan.FromHours(10));
+            Check("foot swing completes once and resets the shared random-action interval", _state == "idle" && _action == null && !_routine.KnockDue(now + 1000));
+            now = Now; _routine.Interact(now - 8 * 60000); Advance(now, TimeSpan.FromHours(10), .99);
+            RecordInteraction(); Advance(Now, TimeSpan.FromHours(10));
+            Check("clicking interrupts foot swing and returns to idle", _state == "idle" && _action == null);
+            now = Now; _routine.Interact(now - 26 * 60000); Advance(now, TimeSpan.FromHours(10), .99);
+            Check("due yawn takes priority over random foot swing", _state == "yawn");
+            RecordInteraction();
+            Check("settings menu includes foot swing preview", CreateSettingsMenu().Items.OfType<System.Windows.Controls.MenuItem>().Any(i => i.Header.ToString() == "坐着晃脚"));
+            SetMovement(MovementMode.Stay); _climbBlockedUntil = 0;
+            var area = Platform.DesktopPlatform.WorkArea(this);
+            Left = area.Left + 6; Top = area.Bottom - Height - 40;
+            now = Now; _lastTick = now - 20; Advance(now, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: .5);
+            Check("left screen edge starts upward climbing with the original GIF", _climbSide == -1 && _state == "climb-left" && _clip!.Loop && _clip.Frames.Count == 9 && _clip.DurationMs == 880 && Left == area.Left && _renderedRotation == 90);
+            var previousTop = Top; Advance(now + 100, TimeSpan.FromHours(10));
+            Check("left climb moves vertically instead of bouncing horizontally", Top < previousTop && Left == area.Left);
+            RenderFrame(_stateStarted + 480); Capture("climb-left");
+            UpdateLayout();
+            var bounds = PetImage.TransformToAncestor(this).TransformBounds(new Rect(0, 0, PetImage.ActualWidth, PetImage.ActualHeight));
+            Check("rotated left sprite fits inside the pet window", bounds.Left >= -1 && bounds.Top >= -1 && bounds.Right <= Width + 1 && bounds.Bottom <= Height + 1);
+            ShowBubble(); Advance(Now, TimeSpan.FromHours(10));
+            Check("opening chat immediately interrupts wall climbing", _climbSide == 0 && _state == "idle" && _renderedRotation == 0);
+            _speechBubble!.Dismiss();
+            _climbBlockedUntil = 0; Left = area.Right - Width - 6; Top = area.Bottom - Height - 40;
+            now = Now; _lastTick = now - 20; Advance(now, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: .5);
+            // Native window positions round to device pixels under fractional display scaling.
+            Check("right screen edge mirrors and rotates the GIF toward the wall", _climbSide == 1 && _state == "climb-right" && _clip!.Mirror && _renderedRotation == -90 && Math.Abs(Left - (area.Right - Width)) <= 1);
+            RenderFrame(_stateStarted + 480); Capture("climb-right");
+            UpdateLayout(); bounds = PetImage.TransformToAncestor(this).TransformBounds(new Rect(0, 0, PetImage.ActualWidth, PetImage.ActualHeight));
+            Check("rotated right sprite fits inside the pet window", bounds.Left >= -1 && bounds.Top >= -1 && bounds.Right <= Width + 1 && bounds.Bottom <= Height + 1);
+            BeginPetDrag(); MovePetDrag(area.Left + area.Width / 2, Top); Advance(Now, TimeSpan.FromHours(10));
+            Check("dragging interrupts climbing and restores normal orientation", _climbSide == 0 && _state.StartsWith("drag") && _renderedRotation == 0);
+            EndPetDrag(); Left = area.Left + 6; Top = area.Bottom - Height - 40;
+            Advance(Now, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: .5);
+            Check("dropping beside a screen edge can start climbing again", _climbSide == -1);
+            RecordInteraction(); _climbBlockedUntil = 0; Left = area.Right - Width; Top = area.Top + 3;
+            now = Now; _lastTick = now - 100;
+            for (var i = 0; i < 4; i++) Advance(now + i * 100, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: 0);
+            Check("reaching the top stops climbing and prevents an immediate climb loop", _climbSide == 0 && Math.Abs(Top - area.Top) < .01 && _direction == -1 && _climbBlockedUntil > now + 400);
+            SetSleeping(true); Left = area.Left; Top = area.Bottom - Height - 40; _climbBlockedUntil = 0;
+            Advance(Now, TimeSpan.FromHours(10));
+            Check("resting at the screen edge does not trigger climbing", _resting && _climbSide == 0 && _state.StartsWith("sleep"));
+            RecordInteraction(); SetMovement(MovementMode.Walk, 1); _climbBlockedUntil = 0; _edgeVisitSide = 0;
+            Left = area.Right - Width - EdgeDistance - 1; Top = area.Bottom - Height - 40;
+            now = Now; _lastTick = now - 100; Advance(now, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: .5);
+            Check("walking toward a screen edge transitions to climbing before a bounce", _climbSide == 1 && _state == "climb-right");
+            RecordInteraction(); SetMovement(MovementMode.Stay);
+            _climbBlockedUntil = 0; _edgeVisitSide = 0;
+            Left = area.Left + 6; Top = area.Bottom - Height - 40;
+            now = Now; _lastTick = now - 20; Advance(now, TimeSpan.FromHours(10), climbSample: .99);
+            Check("an edge approach can choose not to climb", _climbSide == 0 && _state == "idle");
+            Advance(now + 100, TimeSpan.FromHours(10), climbSample: 0);
+            Check("remaining beside the edge does not repeatedly roll the probability", _climbSide == 0 && _state == "idle");
+            Left = area.Left + EdgeDistance + 20; Advance(now + 200, TimeSpan.FromHours(10));
+            Left = area.Left + 6; previousTop = Top;
+            Advance(now + 300, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: 0);
+            Check("leaving and approaching again permits a fresh climb decision", _climbSide == -1);
+            for (var i = 4; i < 105; i++) Advance(now + i * 100, TimeSpan.FromHours(10), climbSample: 0);
+            Check("short distance sample stops after 80 pixels instead of reaching the top", _climbSide == 0 && Math.Abs(Top - Math.Max(area.Top, previousTop - 80)) < .01);
+            Advance(now + 30000, TimeSpan.FromHours(10), climbSample: 0);
+            Check("a finished climb cannot immediately restart even after cooldown", _climbSide == 0);
+            _climbBlockedUntil = 0; _edgeVisitSide = 0; Left = area.Right - Width; Top = area.Bottom - Height - 40;
+            previousTop = Top; now = Now; _lastTick = now - 20;
+            Advance(now, TimeSpan.FromHours(10), climbSample: 0, climbDistanceSample: 1);
+            for (var i = 1; i < 105; i++) Advance(now + i * 100, TimeSpan.FromHours(10), climbSample: 0);
+            Check("long distance sample stops after 240 pixels or the top boundary", _climbSide == 0 && Math.Abs(Top - Math.Max(area.Top, previousTop - 240)) < .01);
+            RecordInteraction();
+            CompletePetClick(new Point(Width * .5, Height * .2));
+            Check("clicking the head plays the supplied twelve-frame head pat once", _state == "head-pat" && _clip!.Frames.Count == 12 && _clip.DurationMs == 4860 && !_clip.Loop && !_clickTimer.IsEnabled && _speechBubble is not { IsVisible: true });
+            RenderFrame(_stateStarted + 2100); Capture("head-pat");
+            end = _actionUntil; Advance(end + 1, TimeSpan.FromHours(10));
+            Check("head pat finishes and returns to normal idle", _action == null && _state == "idle");
+            CompletePetClick(new Point(Width * .5, Height * .7));
+            Check("body clicks still schedule the original chat popup", _clickTimer.IsEnabled && _action == null);
+            _clickTimer.Stop();
+            CompletePetClick(new Point(Width * .5, Height * .2)); BeginPetDrag();
+            Check("dragging interrupts head pat and keeps drag behaviour", _state == "drag" && _action == null && !_clickTimer.IsEnabled);
+            EndPetDrag();
+            // Keep the face checks away from the randomly triggered screen-edge climb.
+            Left = area.Left + Math.Max(0, area.Width - Width) / 2;
+            CompletePetClick(new Point(Width * .37, Height * .33));
+            Check("left cheek click plays supplied cheek block once without opening chat", _state == "cheek-block" && _clip!.Frames.Count == 12 && _clip.DurationMs == 4250 && !_clip.Loop && !_clickTimer.IsEnabled && _speechBubble is not { IsVisible: true });
+            RenderFrame(_stateStarted + 2000); Capture("cheek-block");
+            end = _actionUntil; Advance(end + 1, TimeSpan.FromHours(10));
+            Check("cheek block finishes and restores normal idle", _action == null && _state == "idle");
+            CompletePetClick(new Point(Width * .63, Height * .33));
+            Check("right cheek click has precedence over surrounding hair", _state == "cheek-block" && _action == "cheek-block");
+            CompletePetClick(new Point(Width * .5, Height * .15));
+            Check("crown click replaces cheek block with head pat", _state == "head-pat" && _action == "head-pat");
+            var previousScale = _settings.Scale; SetScale(.65);
+            CompletePetClick(new Point(Width * .37, Height * .33));
+            Check("cheek touch region follows pet scaling", _state == "cheek-block" && !_clickTimer.IsEnabled);
+            SetScale(previousScale);
+            CompletePetClick(new Point(Width * .63, Height * .33)); BeginPetDrag();
+            Check("dragging from the face cancels cheek animation", _state == "drag" && _action == null && !_clickTimer.IsEnabled);
+            EndPetDrag();
+            CompletePetClick(new Point(Width * .37, Height * .33));
+            RecordInteraction(); CompletePetClick(new Point(Width * .5, Height * .7));
+            Check("body click after cheek poke retains the chat popup", _clickTimer.IsEnabled && _action == null);
+            _clickTimer.Stop();
+        }
+        catch (Exception ex) { failed = true; checks.Add(new { name = "routine runtime", passed = false, error = ex.ToString() }); }
+        File.WriteAllText(Path.Combine(directory, "results.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
+        Application.Current.Shutdown(failed ? 1 : 0);
+    }
+}

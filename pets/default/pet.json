@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "name": "羽川翼 · 占位资源",
+  "canvas": {
+    "width": 200,
+    "height": 220
+  },
+  "animations": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {
+          "file": "frames/idle-v3/00.png",
+          "durationMs": 380
+        },
+        {
+          "file": "frames/idle-v3/01.png",
+          "durationMs": 340
+        },
+        {
+          "file": "frames/idle-v3/02.png",
+          "durationMs": 320
+        },
+        {
+          "file": "frames/idle-v3/03.png",
+          "durationMs": 280
+        },
+        {
+          "file": "frames/idle-v3/04.png",
+          "durationMs": 300
+        },
+        {
+          "file": "frames/idle-v3/05.png",
+          "durationMs": 420
+        },
+        {
+          "file": "frames/idle-v3/06.png",
+          "durationMs": 380
+        },
+        {
+          "file": "frames/idle-v3/07.png",
+          "durationMs": 100
+        },
+        {
+          "file": "frames/idle-v3/08.png",
+          "durationMs": 100
+        },
+        {
+          "file": "frames/idle-v3/09.png",
+          "durationMs": 100
+        },
+        {
+          "file": "frames/idle-v3/10.png",
+          "durationMs": 320
+        },
+        {
+          "file": "frames/idle-v3/11.png",
+          "durationMs": 420
+        }
+      ]
+    },
+    "walk-right": {
+      "frames": [
+        {
+          "file": "frames/walk-00.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-01.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-02.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-03.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-04.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-05.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-06.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/walk-07.png",
+          "durationMs": 180
+        }
+      ]
+    },
+    "walk-left": {
+      "mirrorOf": "walk-right"
+    },
+    "wave": {
+      "loop": false,
+      "frames": [
+        {
+          "file": "frames/idle.png",
+          "durationMs": 90
+        },
+        {
+          "file": "frames/wave.png",
+          "durationMs": 200
+        },
+        {
+          "file": "frames/idle.png",
+          "durationMs": 130
+        },
+        {
+          "file": "frames/wave.png",
+          "durationMs": 200
+        },
+        {
+          "file": "frames/idle.png",
+          "durationMs": 130
+        }
+      ]
+    },
+    "jump": {
+      "loop": false,
+      "frames": [
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": 0
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -4
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -11
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -19
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -23
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -19
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -11
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": -4
+        },
+        {
+          "file": "frames/jump.png",
+          "durationMs": 90,
+          "offsetY": 0
+        }
+      ]
+    },
+    "sleep": {
+      "loop": true,
+      "frames": [
+        {
+          "file": "frames/rest-v1/rest-still/00.png",
+          "durationMs": 700
+        },
+        {
+          "file": "frames/rest-v1/rest-still/01.png",
+          "durationMs": 600
+        },
+        {
+          "file": "frames/rest-v1/rest-still/02.png",
+          "durationMs": 650
+        },
+        {
+          "file": "frames/rest-v1/rest-still/03.png",
+          "durationMs": 650
+        },
+        {
+          "file": "frames/rest-v1/rest-still/04.png",
+          "durationMs": 600
+        },
+        {
+          "file": "frames/rest-v1/rest-still/05.png",
+          "durationMs": 800
+        }
+      ]
+    },
+    "drag": {
+      "loop": true,
+      "sheet": {
+        "file": "frames/drag-sprites.png",
+        "frameWidth": 192,
+        "frameHeight": 208,
+        "columns": 8,
+        "start": 0,
+        "count": 6,
+        "durationsMs": [
+          1200,
+          90,
+          100,
+          70,
+          90,
+          1100
+        ]
+      }
+    },
+    "happy": {
+      "loop": false,
+      "frames": [
+        {
+          "file": "frames/wave.png",
+          "durationMs": 230
+        },
+        {
+          "file": "frames/idle.png",
+          "durationMs": 150
+        },
+        {
+          "file": "frames/wave.png",
+          "durationMs": 230
+        }
+      ]
+    },
+    "drag-right": {
+      "loop": true,
+      "sheet": {
+        "file": "frames/drag-sprites.png",
+        "frameWidth": 192,
+        "frameHeight": 208,
+        "columns": 8,
+        "start": 8,
+        "count": 8,
+        "durationsMs": [
+          160,
+          100,
+          100,
+          110,
+          170,
+          110,
+          100,
+          100
+        ]
+      }
+    },
+    "drag-left": {
+      "loop": true,
+      "sheet": {
+        "file": "frames/drag-sprites.png",
+        "frameWidth": 192,
+        "frameHeight": 208,
+        "columns": 8,
+        "start": 16,
+        "count": 8,
+        "durationsMs": [
+          160,
+          100,
+          100,
+          110,
+          170,
+          110,
+          100,
+          100
+        ]
+      }
+    },
+    "sleep-ear-twitch": {
+      "loop": true,
+      "frames": [
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/00.png",
+          "durationMs": 1600
+        },
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/01.png",
+          "durationMs": 400
+        },
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/02.png",
+          "durationMs": 120
+        },
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/03.png",
+          "durationMs": 120
+        },
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/04.png",
+          "durationMs": 300
+        },
+        {
+          "file": "frames/rest-v1/rest-ear-twitch/05.png",
+          "durationMs": 1460
+        }
+      ]
+    },
+    "sleep-tail-flick": {
+      "loop": true,
+      "frames": [
+        {
+          "file": "frames/rest-v1/rest-tail-flick/00.png",
+          "durationMs": 1600
+        },
+        {
+          "file": "frames/rest-v1/rest-tail-flick/01.png",
+          "durationMs": 450
+        },
+        {
+          "file": "frames/rest-v1/rest-tail-flick/02.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/rest-v1/rest-tail-flick/03.png",
+          "durationMs": 180
+        },
+        {
+          "file": "frames/rest-v1/rest-tail-flick/04.png",
+          "durationMs": 450
+        },
+        {
+          "file": "frames/rest-v1/rest-tail-flick/05.png",
+          "durationMs": 1140
+        }
+      ]
+    },
+    "yawn": {
+      "loop": false,
+      "file": "frames/yawn.gif"
+    },
+    "climb-left": {
+      "file": "frames/crawl-forward-v7.gif",
+      "loop": true
+    },
+    "climb-right": {
+      "mirrorOf": "climb-left"
+    },
+    "head-pat": {
+      "file": "frames/head-pat.gif",
+      "loop": false
+    },
+    "cheek-block": {
+      "file": "frames/cheek-block.gif",
+      "loop": false
+    },
+    "foot-swing": {
+      "file": "frames/foot-swing.gif",
+      "loop": false
+    },
+    "thinking": {
+      "file": "frames/thinking.gif",
+      "loop": true
+    },
+    "knock": {
+      "file": "frames/screen-knock.gif",
+      "loop": false
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<Window x:Class="HanekawaPet.AiSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AI 接口与知识库设置" Width="780" Height="760" MinWidth="620" MinHeight="530"
+        WindowStartupLocation="CenterScreen" Background="#F5F7FB" FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14">
+    <Window.Resources>
+        <Style TargetType="Button"><Setter Property="Padding" Value="12,7"/><Setter Property="Margin" Value="0,0,8,6"/></Style>
+        <Style TargetType="TextBox"><Setter Property="Padding" Value="8,6"/></Style>
+        <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+        <Style TargetType="TabItem"><Setter Property="Padding" Value="16,9"/></Style>
+    </Window.Resources>
+    <DockPanel Margin="20">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+            <TextBlock Text="AI 接口与知识库" FontSize="25" FontWeight="SemiBold" Foreground="#172B4D"/>
+            <TextBlock x:Name="StatusText" Text="正在启动本地服务…" Foreground="#52627A" Margin="0,6,0,0"/>
+        </StackPanel>
+        <TabControl x:Name="Tabs" Background="White">
+            <TabItem Header="AI 设置">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="22">
+                        <TextBlock Text="OpenAI 兼容接口" FontSize="19" FontWeight="SemiBold"/>
+                        <TextBlock Text="填写服务商提供的地址和模型，保存后即可聊天。支持 DeepSeek、通义等兼容 Chat Completions 的服务。" Foreground="#52627A" Margin="0,6,0,16"/>
+                        <TextBlock Text="接口地址（Base URL）"/><TextBox x:Name="BaseUrlBox" Margin="0,6,0,4"/>
+                        <TextBlock Text="例如 https://api.deepseek.com/v1；兼容地址需要的 /v1 等路径请按服务商文档填写。也支持完整的 /chat/completions 地址。" FontSize="12" Foreground="#64748B" Margin="0,0,0,14"/>
+                        <TextBlock Text="模型名称"/><TextBox x:Name="ModelBox" Margin="0,6,0,14"/>
+                        <TextBlock x:Name="KeyHint" Text="API 密钥"/>
+                        <PasswordBox x:Name="KeyBox" Padding="8,6" Margin="0,6,0,8"/>
+                        <CheckBox x:Name="ClearKeyBox" Content="清除已保存的密钥（用于本地免密模型）" Margin="0,0,0,16"/>
+                        <Expander Header="可选参数" Margin="0,0,0,18">
+                            <StackPanel Margin="0,12,0,0">
+                                <TextBlock Text="Temperature（0～2；留空使用模型默认值）"/><TextBox x:Name="TemperatureBox" Margin="0,5,0,12"/>
+                                <TextBlock Text="输出上限 max_tokens（留空不发送此参数）"/><TextBox x:Name="MaxTokensBox" Margin="0,5,0,12"/>
+                                <TextBlock Text="等待超时（10～600 秒）"/><TextBox x:Name="TimeoutBox" Text="120" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Expander>
+                        <WrapPanel>
+                            <Button x:Name="SaveConfigButton" Content="保存设置" Click="OnSaveConfig"/>
+                            <Button x:Name="TestConfigButton" Content="保存并测试连接" Click="OnTestConfig"/>
+                        </WrapPanel>
+                        <TextBlock Text="测试会向所填模型发送一次简短请求。密钥只在本机保存，使用 Windows 账户加密；密码框留空会保留原密钥。" FontSize="12" Foreground="#64748B"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="角色与知识库">
+                <DockPanel Margin="18">
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Text="让它记住自己的设定" FontSize="19" FontWeight="SemiBold"/>
+                        <TextBlock Text="角色设定：身份、性格、语气，每轮生效。问答资料：背景、笔记、常见问答，按问题检索。支持 UTF-8 的 .md / .json / .jsonl。" Foreground="#52627A" Margin="0,8,0,14"/>
+                        <WrapPanel>
+                            <Button x:Name="PersonaButton" Content="导入角色设定…" Click="OnImportPersona"/>
+                            <Button x:Name="DocumentsButton" Content="导入问答资料…" Click="OnImportDocuments"/>
+                            <Button x:Name="RefreshKnowledgeButton" Content="刷新" Click="OnRefreshKnowledge"/>
+                        </WrapPanel>
+                        <TextBlock Text="同分类同名文件会被替换。修改设定后下一条消息即生效；想清除旧语境可新建对话。初始的‘角色设定.md’可直接编辑或移除。" FontSize="12" Foreground="#64748B" Margin="0,0,0,12"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                        <WrapPanel><Button Content="打开知识库文件夹" Click="OnOpenKnowledge"/><Button x:Name="RemoveFileButton" Content="从知识库移除所选文件" Click="OnRemoveFile"/></WrapPanel>
+                        <TextBlock x:Name="KnowledgePathText" FontSize="12" Foreground="#64748B"/>
+                        <TextBlock Text="可在文件夹直接编辑文件，无需重启。移除只删除知识库副本，不影响导入前的原文件。" FontSize="12" Foreground="#64748B" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    <ListBox x:Name="FilesBox" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="6">
+                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding Detail}" Foreground="#52627A" FontSize="12" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding Error}" Foreground="#B42318" FontSize="12"/>
+                        </StackPanel></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

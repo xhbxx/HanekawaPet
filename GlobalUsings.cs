@@ -1,0 +1,17 @@
+global using Application = System.Windows.Application;
+global using MessageBox = System.Windows.MessageBox;
+global using Point = System.Windows.Point;
+global using Size = System.Windows.Size;
+global using Color = System.Windows.Media.Color;
+global using Brushes = System.Windows.Media.Brushes;
+global using Button = System.Windows.Controls.Button;
+global using CheckBox = System.Windows.Controls.CheckBox;
+global using ComboBox = System.Windows.Controls.ComboBox;
+global using Orientation = System.Windows.Controls.Orientation;
+global using HorizontalAlignment = System.Windows.HorizontalAlignment;
+global using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>HanekawaPet</AssemblyName>
+    <ApplicationIcon>assets\pet.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>0.12.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="archive\**;qa\**;backend\**" />
+    <Content Remove="backend\**" />
+    <None Remove="backend\**" />
+    <Page Remove="archive\**" />
+    <ApplicationDefinition Remove="archive\**" />
+    <Content Include="pets\**\*;gacha\**\*;assets\pet.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="README.md;ANIMATION-PACK.md;AI-GUIDE.md;AI接口设置.cmd;ASSETS.md;CHANGELOG.md;docs\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="backend\HanekawaPet.Backend.csproj" ReferenceOutputAssembly="false" Private="false" />
+  </ItemGroup>
+  <Target Name="CopyLocalBackend" AfterTargets="Build">
+    <PropertyGroup><BackendBuildFolder>$(MSBuildProjectDirectory)\backend\bin\$(Configuration)\net9.0\</BackendBuildFolder>
+        <BackendBuildFolder Condition="'$(RuntimeIdentifier)' != ''">$(BackendBuildFolder)$(RuntimeIdentifier)\</BackendBuildFolder></PropertyGroup>
+    <ItemGroup><BackendFiles Include="$(BackendBuildFolder)HanekawaPet.Backend.*" /></ItemGroup>
+    <Copy SourceFiles="@(BackendFiles)" DestinationFolder="$(OutDir)backend" />
+  </Target>
+</Project>

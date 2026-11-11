@@ -1,0 +1,80 @@
+{
+  "animations": [
+    "animations/gacha-coral.gif",
+    "animations/gacha-cyan.gif",
+    "animations/gacha-violet.gif",
+    "animations/gacha-gold.gif"
+  ],
+  "prizes": [
+    {
+      "id": "super-mario",
+      "name": "超级马力欧",
+      "image": "images/super-mario.png",
+      "description": "超级马力欧主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "portal",
+      "name": "传送门",
+      "image": "images/portal.png",
+      "description": "传送门主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "fullmetal-alchemist",
+      "name": "钢之炼金术师",
+      "image": "images/fullmetal-alchemist.png",
+      "description": "钢之炼金术师主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "attack-on-titan",
+      "name": "进击的巨人",
+      "image": "images/attack-on-titan.png",
+      "description": "进击的巨人主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "ace-attorney",
+      "name": "逆转裁判",
+      "image": "images/ace-attorney.png",
+      "description": "逆转裁判主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "zelda",
+      "name": "塞尔达传说",
+      "image": "images/zelda.png",
+      "description": "塞尔达传说主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "death-note",
+      "name": "死亡笔记",
+      "image": "images/death-note.png",
+      "description": "死亡笔记主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "kingdom-hearts",
+      "name": "王国之心",
+      "image": "images/kingdom-hearts.png",
+      "description": "王国之心主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "minecraft",
+      "name": "我的世界",
+      "image": "images/minecraft.png",
+      "description": "我的世界主题印象收藏图标",
+      "weight": 1
+    },
+    {
+      "id": "evangelion",
+      "name": "新世纪福音战士",
+      "image": "images/evangelion.png",
+      "description": "新世纪福音战士主题印象收藏图标",
+      "weight": 1
+    }
+  ]
+}
